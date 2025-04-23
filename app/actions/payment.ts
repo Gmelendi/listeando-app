@@ -64,17 +64,16 @@ export async function handlePaymentSuccess(sessionId: string) {
     const existingList = await getListBySessionId(sessionId)
 
     if (existingList) {
+      console.log("Existing list found for session:", existingList)
       // If the list exists and is completed, return it
       if (existingList.status === "completed") {
         return {
           success: true,
           prompt,
           sessionId,
-          listId: existingList._id,
+          listId: existingList._id?.toString(),
           title: existingList.title,
-          fields: existingList.fields,
-          items: existingList.items,
-          sources: existingList.sources,
+          data: existingList.data,
           status: existingList.status,
         }
       }
@@ -84,7 +83,7 @@ export async function handlePaymentSuccess(sessionId: string) {
         success: true,
         prompt,
         sessionId,
-        listId: existingList._id,
+        listId: existingList._id?.toString(),
         status: existingList.status,
       }
     }

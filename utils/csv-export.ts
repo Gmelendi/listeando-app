@@ -1,42 +1,20 @@
-import type { FieldDefinition, FieldType } from "@/lib/db/models"
-
-/**
- * Format a field value based on its type
- */
-export function formatFieldValue(value: any, type: FieldType): string {
-  if (value === null || value === undefined) return ""
-
-  switch (type) {
-    case "currency":
-      return typeof value === "number" ? `$${value.toFixed(2)}` : `$${value}`
-    case "percentage":
-      return typeof value === "number" ? `${value}%` : `${value}%`
-    case "boolean":
-      return value ? "Yes" : "No"
-    default:
-      return value.toString()
-  }
-}
-
 /**
  * Converts list data to CSV format with dynamic fields
  */
 export function convertListToCSV(
-  listTitle: string,
-  items: Array<{ position: number; fields: Record<string, any> }>,
-  fields: FieldDefinition[],
+  data: Array<{ [key: string]: any }> // array of arbitrary objects
 ): string {
   // Create CSV header with dynamic fields
-  const header = ["Position", ...fields.map((field) => field.displayName)]
+  const header = Object.keys(data[0]).map((key) => `"${key}"`)
 
   // Create CSV rows from items
-  const rows = items.map((item) => {
-    const row = [item.position.toString()]
+  const rows = data.map((item) => {
+    const row: string[] = []
 
     // Add each field value in the correct order
-    fields.forEach((field) => {
-      const value = item.fields[field.name]
-      const formattedValue = formatFieldValue(value, field.type)
+    Object.keys(item).forEach((fieldName: string) => {
+      const value: any = item[fieldName]
+      const formattedValue: string = value.toString()
       row.push(`"${formattedValue.replace(/"/g, '""')}"`) // Escape quotes in CSV
     })
 
@@ -89,11 +67,10 @@ export function sanitizeFilename(str: string): string {
  * Main function to export list data as CSV and trigger download
  */
 export function exportListAsCSV(
-  listTitle: string,
-  items: Array<{ position: number; fields: Record<string, any> }>,
-  fields: FieldDefinition[],
+  listId: string,
+  data: Array<{}>
 ): void {
-  const csvContent = convertListToCSV(listTitle, items, fields)
-  const filename = `${sanitizeFilename(listTitle)}-list.csv`
+  const csvContent = convertListToCSV(data)
+  const filename = `${sanitizeFilename(listId)}-list.csv`
   downloadCSV(csvContent, filename)
 }

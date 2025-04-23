@@ -4,16 +4,15 @@ import { useState } from "react"
 import { Button, type ButtonProps } from "@/components/ui/button"
 import { Download, Check } from "lucide-react"
 import { exportListAsCSV } from "@/utils/csv-export"
-import type { FieldDefinition } from "@/lib/db/models"
+
 
 interface DownloadButtonProps extends ButtonProps {
-  listTitle: string
-  items: Array<{ position: number; fields: Record<string, any> }>
-  fields: FieldDefinition[]
+  listId: string
+  data: Record<string, any>[]
   onComplete?: () => void
 }
 
-export function DownloadCSVButton({ listTitle, items, fields, onComplete, className, ...props }: DownloadButtonProps) {
+export function DownloadCSVButton({listId, data, onComplete, className, ...props }: DownloadButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
 
@@ -22,7 +21,7 @@ export function DownloadCSVButton({ listTitle, items, fields, onComplete, classN
 
     try {
       // Export the list as CSV
-      exportListAsCSV(listTitle, items, fields)
+      exportListAsCSV(listId, data)
 
       // Show success state
       setIsComplete(true)
@@ -42,7 +41,7 @@ export function DownloadCSVButton({ listTitle, items, fields, onComplete, classN
   return (
     <Button
       onClick={handleDownload}
-      disabled={isDownloading || items.length === 0}
+      disabled={isDownloading || data.length === 0}
       className={`${className} transition-all duration-300`}
       {...props}
     >

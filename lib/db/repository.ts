@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb"
 import { getCollection } from "./mongodb"
-import type { ListDocument, ListItemDocument, SourceDocument, CompleteList, ListStatus } from "./models"
+import type { ListDocument, ListStatus } from "./models"
 
 // Lists collection
 export async function createList(list: Omit<ListDocument, "_id">): Promise<ObjectId> {
@@ -32,48 +32,17 @@ export async function getListBySessionId(sessionId: string): Promise<ListDocumen
   return collection.findOne({ sessionId })
 }
 
-// List items collection
-export async function createListItems(items: Omit<ListItemDocument, "_id">[]): Promise<void> {
-  if (items.length === 0) return
-  const collection = await getCollection<ListItemDocument>("list_items")
-  await collection.insertMany(items)
-}
-
-export async function getListItems(listId: ObjectId): Promise<ListItemDocument[]> {
-  const collection = await getCollection<ListItemDocument>("list_items")
-  return collection.find({ listId }).sort({ position: 1 }).toArray()
-}
-
-// Sources collection
-export async function createSources(sources: Omit<SourceDocument, "_id">[]): Promise<void> {
-  if (sources.length === 0) return
-  const collection = await getCollection<SourceDocument>("sources")
-  await collection.insertMany(sources)
-}
-
-export async function getListSources(listId: ObjectId): Promise<SourceDocument[]> {
-  const collection = await getCollection<SourceDocument>("sources")
-  return collection.find({ listId }).toArray()
-}
-
 // Get complete list with items and sources
-export async function getCompleteList(listId: ObjectId | string): Promise<CompleteList | null> {
+export async function getCompleteList(listId: ObjectId | string): Promise<ListDocument | null> {
   const objectId = typeof listId === "string" ? new ObjectId(listId) : listId
 
   const list = await getListById(objectId)
   if (!list) return null
 
-  const items = await getListItems(objectId)
-  const sources = await getListSources(objectId)
-
-  return {
-    ...list,
-    items,
-    sources,
-  }
+  return list
 }
 
-export async function getCompleteListBySessionId(sessionId: string): Promise<CompleteList | null> {
+export async function getCompleteListBySessionId(sessionId: string): Promise<ListDocument | null> {
   const list = await getListBySessionId(sessionId)
   if (!list) return null
 

@@ -19,14 +19,10 @@ async function initMongoDB() {
 
     // Create collections if they don't exist
     await db.createCollection("lists")
-    await db.createCollection("list_items")
-    await db.createCollection("sources")
 
     // Create indexes
     await db.collection("lists").createIndex({ sessionId: 1 }, { unique: true, sparse: true })
     await db.collection("lists").createIndex({ userId: 1 }, { sparse: true })
-    await db.collection("list_items").createIndex({ listId: 1 })
-    await db.collection("sources").createIndex({ listId: 1 })
 
     console.log("MongoDB initialization completed successfully")
   } catch (error) {

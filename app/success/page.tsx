@@ -5,12 +5,11 @@ import { useSearchParams } from "next/navigation"
 import { handlePaymentSuccess } from "../actions/payment"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle, ExternalLink, Info } from "lucide-react"
+import { Loader2, CheckCircle } from "lucide-react"
 import { DownloadCSVButton } from "@/components/download-button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import type { FieldType, CompleteList } from "@/lib/db/models"
+import { ListDocument } from "@/lib/db/models"
 
-interface ListData extends Omit<CompleteList, "_id" | "listId"> {
+interface ListData extends Omit<ListDocument, "_id" | "listId"> {
   _id?: string
   listId?: string
   success?: boolean
@@ -83,23 +82,6 @@ export default function SuccessPage() {
     processPayment()
   }, [sessionId])
 
-  // Helper function to format field values based on their type
-  const formatFieldValue = (value: any, type: FieldType) => {
-    if (value === null || value === undefined) return "N/A"
-
-    switch (type) {
-      case "currency":
-        return typeof value === "number" ? `${value.toFixed(2)}` : `${value}`
-      case "percentage":
-        return typeof value === "number" ? `${value}%` : `${value}%`
-      case "rating":
-        return typeof value === "number" ? "⭐".repeat(Math.min(Math.round(value), 5)) : value
-      case "boolean":
-        return value ? "Yes" : "No"
-      default:
-        return value.toString()
-    }
-  }
 
   if (loading) {
     return (
@@ -200,11 +182,10 @@ export default function SuccessPage() {
             <h2 className="text-lg font-semibold text-navy-800">{listData?.title || "Generated List"}</h2>
 
             {/* CSV Download Button */}
-            {listData?.items && listData?.fields && (
+            {listData?.data && listData.data.length > 0 && (
               <DownloadCSVButton
-                listTitle={listData.title || listData.prompt}
-                items={listData.items}
-                fields={listData.fields}
+                listId={listData._id || ""}  // Use the list's ID if available
+                data={listData.data}
                 variant="outline"
                 size="sm"
                 className="flex items-center text-sm border-teal-200 text-teal-700 hover:bg-teal-50"
@@ -213,7 +194,7 @@ export default function SuccessPage() {
           </div>
 
           {/* Table for displaying items with dynamic fields */}
-          <div className="overflow-x-auto">
+          {/* <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-sky-100/50 text-left">
@@ -250,56 +231,20 @@ export default function SuccessPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table> */}
           </div>
         </div>
 
-        {/* Sources section */}
-        {listData?.sources && listData.sources.length > 0 && (
-          <div className="bg-sky-50/70 rounded-lg p-4 mb-6 border border-sky-100">
-            <div className="flex items-center gap-2 mb-3">
-              <h2 className="text-lg font-semibold text-navy-800">Research Sources</h2>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info size={16} className="text-navy-500" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Sources used to compile this list</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            <div className="space-y-2">
-              {listData.sources.map((source, index) => (
-                <div key={source._id?.toString() || index} className="text-sm">
-                  <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-teal-600 hover:text-teal-700 hover:underline flex items-center"
-                  >
-                    {source.title || source.url}
-                    <ExternalLink size={12} className="ml-1" />
-                  </a>
-                  {source.snippet && <p className="text-navy-500 text-xs mt-0.5">{source.snippet}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Main Download Button */}
-          {listData?.items && listData?.fields && (
+          {/* {listData?.items && listData?.fields && (
             <DownloadCSVButton
               listTitle={listData.title || listData.prompt}
               items={listData.items}
               fields={listData.fields}
               className="bg-teal-600 hover:bg-teal-700 text-white flex-1"
             />
-          )}
+          )} */}
 
           <Link href="/" className="flex-1">
             <Button variant="outline" className="w-full border-teal-200 text-teal-700 hover:bg-teal-50">
@@ -308,6 +253,5 @@ export default function SuccessPage() {
           </Link>
         </div>
       </div>
-    </div>
   )
 }

@@ -4,32 +4,13 @@ import {
   createList,
   updateList,
   updateListStatus,
-  createListItems,
-  createSources,
   getCompleteListBySessionId,
 } from "../db/repository"
-import type { FieldType, ListItemDocument, SourceDocument } from "../db/models"
 
 // Interface for the research result with dynamic fields
 interface ResearchResult {
   title: string
-  fields: Array<{
-    name: string
-    displayName: string
-    type: FieldType
-    description?: string
-    isRequired?: boolean
-  }>
-  items: Array<{
-    position: number
-    fields: Record<string, any>
-  }>
-  sources: Array<{
-    url: string
-    title?: string
-    snippet?: string
-    isReliable?: boolean
-  }>
+  data: Array<{}>
 }
 
 export async function researchAndGenerateList(prompt: string, sessionId?: string, userId?: string): Promise<string> {
@@ -41,7 +22,7 @@ export async function researchAndGenerateList(prompt: string, sessionId?: string
     userId,
     createdAt: new Date(),
     updatedAt: new Date(),
-    fields: [],
+    data: [],
   })
 
   // Start the research process asynchronously
@@ -66,52 +47,22 @@ Follow these steps:
 3. Research the topic thoroughly, considering multiple sources.
 4. Create a list with items that have values for each of your defined fields.
 5. Format your response as a JSON object with the following structure:
-
 {
   "title": "A descriptive title for the list",
-  "fields": [
+  "data": [
     {
-      "name": "fieldName", // camelCase, no spaces, used as identifier
-      "displayName": "Field Name", // Human-readable name with proper capitalization
-      "type": "text", // One of: text, number, boolean, date, url, email, phone, currency, percentage, rating
-      "description": "Description of what this field represents", // Optional
-      "isRequired": true // Optional, defaults to false
-    },
-    // Add more fields as needed
-  ],
-  "items": [
-    {
-      "position": 1,
-      "fields": {
-        "fieldName": "Value for this field",
-        "anotherField": "Another value",
-        // Include values for all defined fields
-      }
-    },
-    // Add more items as needed
-  ],
-  "sources": [
-    {
-      "url": "https://example.com",
-      "title": "Source title",
-      "snippet": "Relevant snippet from the source",
-      "isReliable": true
-    },
-    // Add more sources as needed
+      "<field1>": "<value1>",
+      "<field2>": "<value2>",
+      // add more fields as needed
+    }
+      // add more items as needed
   ]
 }
+6. Responde only with the valid JSON object. Do not include any additional text or comments.
 
 IMPORTANT NOTES:
 - Always include a "title" field for each item
-- Always include a "description" field for each item
-- For restaurant or venue lists, include address, rating, and price range if applicable
-- For product lists, include price, rating, and key features
-- For book or media lists, include author/creator, year, and genre
-- For travel destinations, include best time to visit, key attractions, and cost level
-- Ensure all field names are valid JavaScript identifiers (camelCase, no spaces or special characters)
-- Ensure all field values match their defined type
-- Provide at least 5 items in the list, more for complex topics
-- Include at least 3 sources with URLs`
+- Ensure all field names are valid JavaScript identifiers (camelCase, no spaces or special characters)`
 
     // Initialize the OpenAI client
     const openai = new OpenAI({
@@ -149,37 +100,8 @@ IMPORTANT NOTES:
     // Update the list with title and fields
     await updateList(listId, {
       title: result.title,
-      fields: result.fields.map((field, index) => ({
-        ...field,
-        order: index,
-      })),
+      data: result.data
     })
-
-    // Insert the list items with dynamic fields
-    if (result.items && Array.isArray(result.items)) {
-      const itemsToInsert: Omit<ListItemDocument, "_id">[] = result.items.map((item) => ({
-        listId,
-        position: item.position,
-        fields: item.fields,
-        createdAt: new Date(),
-      }))
-
-      await createListItems(itemsToInsert)
-    }
-
-    // Insert the sources
-    if (result.sources && Array.isArray(result.sources)) {
-      const sourcesToInsert: Omit<SourceDocument, "_id">[] = result.sources.map((source) => ({
-        listId,
-        url: source.url,
-        title: source.title,
-        snippet: source.snippet,
-        isReliable: source.isReliable,
-        createdAt: new Date(),
-      }))
-
-      await createSources(sourcesToInsert)
-    }
 
     // Update the list status to completed
     await updateListStatus(listId, "completed")
