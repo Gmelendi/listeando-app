@@ -10,6 +10,7 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
+  autoSelectFamily: false
 })
 
 // Connection promise
