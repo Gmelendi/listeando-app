@@ -1,7 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { TextareaPrompt } from "@/components/textarea-prompt"
+import TestimonialCarousel from "@/components/testimonial-carousel"
 
 export default function Home() {
   return (
@@ -57,9 +57,9 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-navy-900 mb-6">
-            From scattered info to
-            <br />
-            <span className="text-teal-600">curated lists.</span>
+            From text to
+            {/* <br /> */}
+            <span className="text-teal-600"> curated lists.</span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-navy-700 mb-8">
@@ -179,98 +179,7 @@ export default function Home() {
       </div>
 
       {/* Testimonials Section */}
-      <div className="relative mt-0 bg-gradient-to-b from-sky-50 to-white py-24">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold tracking-tight text-navy-900 mb-12 text-center">
-            Save hours of research time
-          </h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            {/* Testimonial 1 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-teal-400/10 blur-xl group-hover:bg-teal-400/15 transition-colors duration-300" />
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-sky-100 shadow-md">
-                <div className="flex flex-col h-full">
-                  <div className="mb-6">
-                    <Image
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-GicK90aYtt8zrKnsr4RPexb2hOnWFR.png"
-                      alt="Talia Taylor"
-                      width={96}
-                      height={96}
-                      className="rounded-2xl"
-                    />
-                  </div>
-                  <blockquote className="flex-1 mb-6">
-                    <p className="text-lg font-medium text-navy-800">
-                      "Listeando saved me hours of research for my travel blog. It found hidden gems that weren't even
-                      on the first page of search results."
-                    </p>
-                  </blockquote>
-                  <footer>
-                    <div className="font-medium text-navy-900">Talia Taylor</div>
-                    <div className="text-sm text-navy-600">Travel Blogger</div>
-                  </footer>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-teal-400/10 blur-xl group-hover:bg-teal-400/15 transition-colors duration-300" />
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-sky-100 shadow-md">
-                <div className="flex flex-col h-full">
-                  <div className="mb-6">
-                    <Image
-                      src="/placeholder.svg?height=96&width=96"
-                      alt="Alex Chen"
-                      width={96}
-                      height={96}
-                      className="rounded-2xl"
-                    />
-                  </div>
-                  <blockquote className="flex-1 mb-6">
-                    <p className="text-lg font-medium text-navy-800">
-                      "As a content creator, I use Listeando daily to compile research from multiple sources. It's like
-                      having a research team at my fingertips."
-                    </p>
-                  </blockquote>
-                  <footer>
-                    <div className="font-medium text-navy-900">Alex Chen</div>
-                    <div className="text-sm text-navy-600">Content Creator</div>
-                  </footer>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-teal-400/10 blur-xl group-hover:bg-teal-400/15 transition-colors duration-300" />
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-sky-100 shadow-md">
-                <div className="flex flex-col h-full">
-                  <div className="mb-6">
-                    <Image
-                      src="/placeholder.svg?height=96&width=96"
-                      alt="Sarah Martinez"
-                      width={96}
-                      height={96}
-                      className="rounded-2xl"
-                    />
-                  </div>
-                  <blockquote className="flex-1 mb-6">
-                    <p className="text-lg font-medium text-navy-800">
-                      "Listeando's AI found information across dozens of sources and compiled it into exactly what I
-                      needed. It's transformed how I do research."
-                    </p>
-                  </blockquote>
-                  <footer>
-                    <div className="font-medium text-navy-900">Sarah Martinez</div>
-                    <div className="text-sm text-navy-600">Product Manager</div>
-                  </footer>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TestimonialCarousel />
 
       {/* Use Cases Section */}
       <div className="relative py-24 bg-gradient-to-b from-white to-sky-50">
@@ -395,6 +304,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* User-Generated Lists Section */}
+      {/* <SampleLists /> */}
 
       {/* Pricing Section */}
       <div className="relative mt-0 bg-gradient-to-b from-sky-50 to-white py-24">
