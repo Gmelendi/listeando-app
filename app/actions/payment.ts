@@ -64,7 +64,7 @@ export async function handlePaymentSuccess(sessionId: string) {
     const existingList = await getListBySessionId(sessionId)
 
     if (existingList) {
-      console.log("Existing list found for session:", existingList)
+      console.log("Existing list found for session ID:", sessionId)
       // If the list exists and is completed, return it
       if (existingList.status === "completed") {
         return {

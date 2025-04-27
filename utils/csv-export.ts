@@ -4,17 +4,39 @@
 export function convertListToCSV(
   data: Array<{ [key: string]: any }> // array of arbitrary objects
 ): string {
-  // Create CSV header with dynamic fields
-  const header = Object.keys(data[0]).map((key) => `"${key}"`)
+  // Handle empty array
+  if (!data || !data.length) {
+    return ""
+  }
+
+  // Get all possible keys from all objects
+  const allKeys = Array.from(
+    new Set(
+      data.reduce((keys: string[], item) => {
+        if (item && typeof item === 'object') {
+          return [...keys, ...Object.keys(item)]
+        }
+        return keys
+      }, [])
+    )
+  )
+
+  // Handle case where no valid objects found
+  if (!allKeys.length) {
+    return ""
+  }
+
+  // Create CSV header
+  const header = allKeys.map((key) => `"${key}"`)
 
   // Create CSV rows from items
   const rows = data.map((item) => {
     const row: string[] = []
 
     // Add each field value in the correct order
-    Object.keys(item).forEach((fieldName: string) => {
-      const value: any = item[fieldName]
-      const formattedValue: string = value.toString()
+    allKeys.forEach((fieldName: string) => {
+      const value = item && typeof item === 'object' ? item[fieldName] : ''
+      const formattedValue = value !== null && value !== undefined ? value.toString() : ''
       row.push(`"${formattedValue.replace(/"/g, '""')}"`) // Escape quotes in CSV
     })
 

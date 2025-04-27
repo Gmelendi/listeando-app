@@ -8,6 +8,18 @@ import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle } from "lucide-react"
 import { DownloadCSVButton } from "@/components/download-button"
 import { ListDocument } from "@/lib/db/models"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+
+const POLLING_INTERVAL = 5000; // 5 seconds
+const MAX_POLLING_ATTEMPTS = 60; // 5 minutes max (60 * 5 seconds)
 
 interface ListData extends Omit<ListDocument, "_id" | "listId"> {
   _id?: string
@@ -22,6 +34,7 @@ export default function SuccessPage() {
   const [error, setError] = useState<string | null>(null)
   const [listData, setListData] = useState<ListData | null>(null)
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
+  const [pollingAttempts, setPollingAttempts] = useState(0)
 
   // Function to check the status of the list
   const checkListStatus = async () => {
@@ -30,16 +43,25 @@ export default function SuccessPage() {
     try {
       const result = await handlePaymentSuccess(sessionId)
       setListData(result as ListData)
-
-      // If the list is completed or failed, stop polling
-      if (result.status === "completed" || result.status === "failed") {
+      setPollingAttempts(prev => prev + 1)
+      // Stop polling if:
+      // 1. List is completed or failed
+      // 2. Max attempts reached
+      if (
+        result.status === "completed" ||
+        result.status === "failed" ||
+        pollingAttempts >= MAX_POLLING_ATTEMPTS
+      ) {
         if (pollingInterval) {
           clearInterval(pollingInterval)
           setPollingInterval(null)
         }
+        setLoading(false)
+        
+        if (pollingAttempts >= MAX_POLLING_ATTEMPTS && result.status !== "completed") {
+          setError("List generation timed out. Please try again.")
+        }
       }
-
-      setLoading(false)
     } catch (err) {
       setError("Failed to process your payment. Please contact support.")
       console.error(err)
@@ -53,6 +75,9 @@ export default function SuccessPage() {
   }
 
   useEffect(() => {
+    let mounted = true;
+    let intervalId: NodeJS.Timeout | null = null;
+
     async function processPayment() {
       if (!sessionId) {
         setError("No session ID found")
@@ -64,23 +89,33 @@ export default function SuccessPage() {
         // Initial check
         await checkListStatus()
 
-        // Start polling if the list is still processing
-        const interval = setInterval(checkListStatus, 5000) // Check every 5 seconds
-        setPollingInterval(interval)
-
-        // Clean up the interval when the component unmounts
-        return () => {
-          clearInterval(interval)
+        // Only start polling if component is still mounted and status is still processing
+        if (mounted && listData?.status === "processing") {
+          intervalId = setInterval(checkListStatus, POLLING_INTERVAL)
+          setPollingInterval(intervalId)
         }
       } catch (err) {
-        setError("Failed to process your payment. Please contact support.")
-        console.error(err)
-        setLoading(false)
+        if (mounted) {
+          setError("Failed to process your payment. Please contact support.")
+          console.error(err)
+          setLoading(false)
+        }
       }
     }
 
     processPayment()
-  }, [sessionId])
+
+    // Cleanup function
+    return () => {
+      mounted = false
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+      if (pollingInterval) {
+        clearInterval(pollingInterval)
+      }
+    }
+  }, [sessionId]) // Remove pollingInterval from dependencies
 
 
   if (loading) {
@@ -178,13 +213,24 @@ export default function SuccessPage() {
 
         {/* Generated List with Download Button */}
         <div className="bg-sky-50/70 rounded-lg p-4 mb-6 border border-sky-100">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-navy-800">{listData?.title || "Generated List"}</h2>
+          <div className="flex justify-between items-center mb-4 space-x-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-semibold text-navy-800">
+                {listData?.title || "Generated List"}
+              </h2>
+              {listData?.data && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="flex flex-row items-center gap-1">
+                      <span>Total:</span> {listData.data.length}
+                  </Badge>
+                </div>
+              )}
+            </div>
 
             {/* CSV Download Button */}
             {listData?.data && listData.data.length > 0 && (
               <DownloadCSVButton
-                listId={listData._id || ""}  // Use the list's ID if available
+                listId={listData._id || ""}
                 data={listData.data}
                 variant="outline"
                 size="sm"
@@ -193,65 +239,48 @@ export default function SuccessPage() {
             )}
           </div>
 
-          {/* Table for displaying items with dynamic fields */}
-          {/* <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-sky-100/50 text-left">
-                  <th className="p-2 border-b border-sky-200">#</th>
-                  {listData?.fields?.map((field) => (
-                    <th key={field.name} className="p-2 border-b border-sky-200">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help">{field.displayName}</span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{field.description || field.displayName}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </th>
+          {/* Table content remains the same */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">#</TableHead>
+                  {listData?.data?.[0] && Object.keys(listData.data[0]).map((fieldName) => (
+                    <TableHead key={fieldName}>
+                      <span className="cursor-help">{fieldName}</span>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {listData?.items?.map((item) => (
-                  <tr key={item._id?.toString()} className="hover:bg-sky-50/50">
-                    <td className="p-2 border-b border-sky-100">
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {listData?.data?.slice(0, 15).map((item, index) => (
+                  <TableRow key={index.toString()}>
+                    <TableCell>
                       <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">{item.position}</span>
+                        <span className="text-white text-sm font-bold">{index + 1}</span>
                       </div>
-                    </td>
-                    {listData.fields?.map((field) => (
-                      <td key={`${item._id}-${field.name}`} className="p-2 border-b border-sky-100">
-                        {formatFieldValue(item.fields[field.name], field.type)}
-                      </td>
+                    </TableCell>
+                    {Object.entries(item).map(([fieldName, fieldValue]) => (
+                      <TableCell key={fieldName}>
+                        <span className="text-navy-700">{String(fieldValue)}</span>
+                      </TableCell>
                     ))}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table> */}
+              </TableBody>
+            </Table>
           </div>
-        </div>
+
 
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Main Download Button */}
-          {/* {listData?.items && listData?.fields && (
-            <DownloadCSVButton
-              listTitle={listData.title || listData.prompt}
-              items={listData.items}
-              fields={listData.fields}
-              className="bg-teal-600 hover:bg-teal-700 text-white flex-1"
-            />
-          )} */}
-
-          <Link href="/" className="flex-1">
+            <Link href="/" className="flex-1">
             <Button variant="outline" className="w-full border-teal-200 text-teal-700 hover:bg-teal-50">
               Research Another Topic
             </Button>
           </Link>
         </div>
       </div>
+    </div>
+    </div>
   )
 }
