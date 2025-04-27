@@ -20,7 +20,7 @@ export async function createCheckoutSession(prompt: string) {
               name: "Custom List Generation",
               description: `List: "${prompt.substring(0, 100)}${prompt.length > 100 ? "..." : ""}"`,
             },
-            unit_amount: 500, // $5.00 in cents
+            unit_amount: 399, // $3.99 in cents
           },
           quantity: 1,
         },

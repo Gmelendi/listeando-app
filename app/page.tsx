@@ -324,7 +324,7 @@ export default function Home() {
                 <div className="flex flex-col h-full">
                   <h3 className="text-2xl font-semibold text-navy-800 mb-2">Pay Per List</h3>
                   <div className="text-5xl font-bold text-navy-900 mb-6">
-                    $5<span className="text-lg font-normal text-navy-600">/list</span>
+                    $3.99<span className="text-lg font-normal text-navy-600">/list</span>
                   </div>
 
                   <ul className="space-y-4 mb-8 flex-1">
