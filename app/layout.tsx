@@ -3,9 +3,11 @@ import './globals.css'
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'Listeando | Create CSV Lists using AI agents',
+  description: 'Create lists effortlessly with the help of AI agents.',
+  generator: 'Next.js',
+  applicationName: 'Listeando',
+  keywords: 'AI, lists, productivity, agents'
 }
 
 export default function RootLayout({
