@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { handlePaymentSuccess } from "../actions/payment"
 import Link from "next/link"
@@ -33,28 +33,31 @@ export default function SuccessPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [listData, setListData] = useState<ListData | null>(null)
-  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
+  const pollingInterval = useRef<NodeJS.Timeout | null>(null)
   const [pollingAttempts, setPollingAttempts] = useState(0)
 
-  // Function to check the status of the list
+  // Function to check the list status
   const checkListStatus = async () => {
+    console.log("Checking list status...")
     if (!sessionId) return
 
     try {
       const result = await handlePaymentSuccess(sessionId)
+      console.log("List status:", result.status)
       setListData(result as ListData)
       setPollingAttempts(prev => prev + 1)
-      // Stop polling if:
-      // 1. List is completed or failed
-      // 2. Max attempts reached
+
       if (
         result.status === "completed" ||
         result.status === "failed" ||
         pollingAttempts >= MAX_POLLING_ATTEMPTS
       ) {
-        if (pollingInterval) {
-          clearInterval(pollingInterval)
-          setPollingInterval(null)
+        // Clear the polling interval if the list is completed or failed
+        console.log("Stopping polling...")
+        if (pollingInterval.current !== null) {
+          console.log("Clearing interval")
+          clearInterval(pollingInterval.current!)
+          pollingInterval.current = null
         }
         setLoading(false)
         
@@ -66,18 +69,11 @@ export default function SuccessPage() {
       setError("Failed to process your payment. Please contact support.")
       console.error(err)
       setLoading(false)
-
-      if (pollingInterval) {
-        clearInterval(pollingInterval)
-        setPollingInterval(null)
-      }
+      
     }
   }
 
   useEffect(() => {
-    let mounted = true;
-    let intervalId: NodeJS.Timeout | null = null;
-
     async function processPayment() {
       if (!sessionId) {
         setError("No session ID found")
@@ -89,33 +85,30 @@ export default function SuccessPage() {
         // Initial check
         await checkListStatus()
 
-        // Only start polling if component is still mounted and status is still processing
-        if (mounted && listData?.status === "processing") {
-          intervalId = setInterval(checkListStatus, POLLING_INTERVAL)
-          setPollingInterval(intervalId)
+        // Start polling only if:
+        // 1. Component is mounted
+        // 2. No existing polling interval
+        // 3. List is still processing or pending
+        if (listData?.status !== "completed" && listData?.status !== "failed") {
+          pollingInterval.current = setInterval(checkListStatus, POLLING_INTERVAL)
+          console.log("Polling started")
         }
       } catch (err) {
-        if (mounted) {
           setError("Failed to process your payment. Please contact support.")
           console.error(err)
           setLoading(false)
-        }
       }
     }
 
     processPayment()
 
-    // Cleanup function
     return () => {
-      mounted = false
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-      if (pollingInterval) {
-        clearInterval(pollingInterval)
+      if (pollingInterval.current) {
+        console.log("Cleaning up polling interval")
+        clearInterval(pollingInterval.current)
       }
     }
-  }, [sessionId]) // Remove pollingInterval from dependencies
+  }, [sessionId])
 
 
   if (loading) {
@@ -230,7 +223,7 @@ export default function SuccessPage() {
             {/* CSV Download Button */}
             {listData?.data && listData.data.length > 0 && (
               <DownloadCSVButton
-                listId={listData._id || ""}
+                listId={listData.listId || ""}
                 data={listData.data}
                 variant="outline"
                 size="sm"
