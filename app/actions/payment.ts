@@ -31,6 +31,7 @@ export async function createCheckoutSession(prompt: string) {
       metadata: {
         prompt: prompt.substring(0, 500), // Store the prompt in metadata (limited to 500 chars)
       },
+      allow_promotion_codes: true,
     })
 
     // Return the session ID and URL
