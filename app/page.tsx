@@ -59,7 +59,7 @@ export default function Home() {
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-navy-900 mb-6">
             From text to
             {/* <br /> */}
-            <span className="text-teal-600"> curated lists.</span>
+            <span className="text-teal-600"> curated lists</span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-lg sm:text-xl text-navy-700 mb-8">
