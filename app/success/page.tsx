@@ -64,6 +64,9 @@ export default function SuccessPage() {
         if (pollingAttempts >= MAX_POLLING_ATTEMPTS && result.status !== "completed") {
           setError("List generation timed out. Please try again.")
         }
+      } else if (result.status === "processing") {
+        // Continue polling if the list is still processing
+        setLoading(false)
       }
     } catch (err) {
       setError("Failed to process your payment. Please contact support.")
