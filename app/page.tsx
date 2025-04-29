@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { TextareaPrompt } from "@/components/textarea-prompt"
 import TestimonialCarousel from "@/components/testimonial-carousel"
+import OpenAILogo from "@/components/openai-logo"
 
 export default function Home() {
   return (
@@ -39,7 +40,6 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <Button className="bg-teal-600 hover:bg-teal-700 rounded-xl text-white">Get Started</Button>
           </div>
         </div>
       </nav>
@@ -67,9 +67,12 @@ export default function Home() {
             need. Get expertly curated lists in seconds, not hours.
           </p>
 
-          <Button size="lg" className="bg-teal-600 hover:bg-teal-700 text-white mb-16">
-            Create Your First List
-          </Button>
+          {/* Replace Button with OpenAI attribution */}
+          <div className="flex justify-center items-center mb-16 gap-2 border border-sky-200 rounded-full px-4 py-1 bg-sky-100 shadow-sm inline-flex">
+            {/* OpenAI logo SVG */}
+            <OpenAILogo className="w-8 h-8"/>
+            <span className="text-navy-700 text-xs font-medium">powered by OpenAI</span>
+          </div>
         </div>
       </div>
 
