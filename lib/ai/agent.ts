@@ -37,7 +37,7 @@ async function gen_schema(state: typeof GraphState.State) {
         let response;
         try {
             response = await agentModel.invoke(conversation, {
-                response_format: { "type": "json_object" },
+                response_format: { "type": "json_object" }, 
                 metadata: {"list_id": state.id}
             });
 
@@ -165,32 +165,3 @@ function createAgent() {
 
 
 export const agent = createAgent().compile();
-
-
-
-// const agent = CustomAgent(Annotation.Root({ prompt: Annotation<string>() }), {
-//     gen_schema: (state) => {
-//         console.log("In node: gen_schema")
-//         const json_schema  = agentModel.invoke(state.prompt);
-//         return {} // Add your state update logic here
-//     },
-//     search_queries: (state) => {
-//         console.log("In node: search_queries")
-//         return {} // Add your state update logic here
-//     },
-//     retrieve: (state) => {
-//         console.log("In node: retrieve")
-//         return {} // Add your state update logic here
-//     },
-//     extract: (state) => {
-//         console.log("In node: extract")
-//         return {} // Add your state update logic here
-//     },
-//     filter: (state) => {
-//         console.log("In node: filter")
-//         return {} // Add your state update logic here
-//     },
-// });
-
-// const compiled_agent = agent.compile();
-// console.log(await compiled_agent.invoke({ prompt: "bar" }));
