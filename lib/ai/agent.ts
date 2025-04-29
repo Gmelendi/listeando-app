@@ -1,6 +1,6 @@
 import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
-import { searchQueriesSchema, validateSchema } from "./utils";
+import { searchQueriesSchema, validateSchema, deduplicateEntries } from "./utils";
 import { tavily } from "@tavily/core";
 import { genSchemaPrompt } from "./prompts/gen-schema";
 import { searchQueriesPrompt } from "./prompts/search-queries";
@@ -139,6 +139,13 @@ async function extract(state: typeof GraphState.State) {
     return { extracted_results: flattenedResults }
 }
 
+async function deduplicate(state: typeof GraphState.State) {
+    console.log("In node: deduplicate");
+    const key = Object.keys(state.extracted_results[0])[0];
+    const uniqueEntries = await deduplicateEntries(state.extracted_results, key, 0.8);
+    return { extracted_results: uniqueEntries };
+}
+
 function createAgent() {
     return new StateGraph(GraphState)
         .addNode("gen_schema", gen_schema)
@@ -146,12 +153,14 @@ function createAgent() {
         .addNode("retrieve_urls", retrieve_urls)
         .addNode("retrieve_content_node", retrieve_content)
         .addNode("extract", extract)
+        .addNode("deduplicate", deduplicate)
         .addEdge(START, "gen_schema")
         .addEdge("gen_schema", "search_queries_node")
         .addEdge("search_queries_node", "retrieve_urls")
         .addEdge("retrieve_urls", "retrieve_content_node")
         .addEdge("retrieve_content_node", "extract")
-        .addEdge("extract", END)
+        .addEdge("extract", "deduplicate")
+        .addEdge("deduplicate", END)
 }
 
 
