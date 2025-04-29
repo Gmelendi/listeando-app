@@ -3,8 +3,9 @@
 import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Loader2, Sparkles } from "lucide-react"
 import { createCheckoutSession } from "@/app/actions/payment"
+import { enhancePrompt } from "@/app/actions/enhance-prompt"
 import { useToast } from "@/hooks/use-toast"
 import { DownloadCSVButton } from "@/components/download-button"
 import type { FieldDefinition } from "@/lib/db/models"
@@ -25,7 +26,9 @@ interface TextareaPromptProps {
 
 export function TextareaPrompt({ existingList }: TextareaPromptProps) {
   const [prompt, setPrompt] = useState(existingList?.prompt || "")
+  const [previousPrompt, setPreviousPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isEnhancing, setIsEnhancing] = useState(false)
   const [characterCount, setCharacterCount] = useState(existingList?.prompt?.length || 0)
   const { toast } = useToast()
 
@@ -35,16 +38,49 @@ export function TextareaPrompt({ existingList }: TextareaPromptProps) {
     setCharacterCount(value.length)
   }
 
+  const handleEnhance = async () => {
+    if (!prompt.trim()) return
+
+    setIsEnhancing(true)
+    try {
+      const enhancedPrompt = await enhancePrompt(prompt)
+      setPreviousPrompt(prompt)
+      setPrompt(enhancedPrompt)
+      setCharacterCount(enhancedPrompt.length)
+      
+      toast({
+        title: "Prompt Enhanced",
+        description: "Your list description has been improved",
+      })
+    } catch (error) {
+      toast({
+        title: "Enhancement Failed",
+        description: "Could not enhance your prompt. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsEnhancing(false)
+    }
+  }
+
+  const handleUndo = () => {
+    if (previousPrompt) {
+      setPrompt(previousPrompt)
+      setCharacterCount(previousPrompt.length)
+      setPreviousPrompt("")
+      toast({
+        title: "Changes Reverted",
+        description: "Your previous prompt has been restored",
+      })
+    }
+  }
+
   const handleSubmit = async () => {
     if (!prompt.trim()) return
 
     setIsLoading(true)
-
     try {
-      // Create a checkout session with Stripe
       const { url } = await createCheckoutSession(prompt)
-
-      // Redirect to Stripe Checkout
       if (url) {
         window.location.href = url
       } else {
@@ -71,15 +107,44 @@ export function TextareaPrompt({ existingList }: TextareaPromptProps) {
           id="prompt"
           placeholder="e.g., '10 highest-rated vegan brunch spots in Lisbon with outdoor seating' or '5 evidence-based productivity techniques for remote workers'"
           className="min-h-[120px] rounded-lg bg-white/70 border border-sky-200 px-4 py-3 text-navy-800 placeholder:text-navy-400
-      focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent resize-none"
+          focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent resize-none text-sm"
           value={prompt}
           onChange={handleInputChange}
+          spellCheck="false"
+          autoComplete="off"
         />
-        <div className="flex justify-between text-xs text-navy-600">
-          <span>Be specific about what you're looking for</span>
-          <span>{characterCount} characters</span>
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-2">
+            <Button
+              onClick={handleEnhance}
+              disabled={isEnhancing || !prompt.trim()}
+              variant="outline"
+              className="text-teal-600 border-teal-200 hover:bg-teal-50"
+            >
+              {isEnhancing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enhancing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Enhance Prompt
+                </>
+              )}
+            </Button>
+            {previousPrompt && (
+              <Button
+                onClick={handleUndo}
+                variant="ghost"
+                className="text-navy-600 hover:text-navy-700"
+              >
+                Undo
+              </Button>
+            )}
+          </div>
+          <span className="text-xs text-navy-600">{characterCount} characters</span>
         </div>
-        <p className="text-xs text-teal-600 mt-1">One-time payment of $5 per research list</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -98,7 +163,6 @@ export function TextareaPrompt({ existingList }: TextareaPromptProps) {
           )}
         </Button>
 
-        {/* Show download button if we have an existing list */}
         {existingList && (
           <DownloadCSVButton
             listTitle={existingList.prompt}
