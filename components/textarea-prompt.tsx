@@ -90,7 +90,7 @@ export function TextareaPrompt() {
         </label>
         <textarea
           id="prompt"
-          placeholder="e.g., '10 highest-rated vegan brunch spots in Lisbon with outdoor seating' or '5 evidence-based productivity techniques for remote workers'"
+          placeholder="e.g., 'Generate a list of the SaaS companies with a focus on AI and ML.'"
           className="min-h-[120px] rounded-lg bg-white/70 border border-sky-200 px-4 py-3 text-navy-800 placeholder:text-navy-400
           focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent resize-none text-sm"
           value={prompt}
