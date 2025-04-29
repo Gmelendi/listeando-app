@@ -86,7 +86,7 @@ export default function Home() {
         {/* Example Output */}
         <div className="relative mt-12 bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-sky-100 shadow-md">
           <h3 className="text-xl font-semibold text-navy-800 mb-4">
-            Example: "10 vegan brunch spots in Lisbon with outdoor seating"
+            Example: "SaaS companies in Berlin hiring for remote roles"
           </h3>
           <div className="space-y-3">
             <div className="flex items-start">
@@ -94,10 +94,9 @@ export default function Home() {
                 <span className="text-white text-sm font-bold">1</span>
               </div>
               <div>
-                <h4 className="text-navy-800 font-medium">The Food Temple</h4>
+                <h4 className="text-navy-800 font-medium">Contentful</h4>
                 <p className="text-navy-600 text-sm">
-                  Creative vegan cuisine in a cozy courtyard setting in Mouraria. Verified by 3 sources including local
-                  food blogs.
+                  API-first content platform. Currently listing remote positions in engineering and product. Verified via company careers page and LinkedIn.
                 </p>
               </div>
             </div>
@@ -106,10 +105,9 @@ export default function Home() {
                 <span className="text-white text-sm font-bold">2</span>
               </div>
               <div>
-                <h4 className="text-navy-800 font-medium">Ao 26 Vegan Food Project</h4>
+                <h4 className="text-navy-800 font-medium">Adjust</h4>
                 <p className="text-navy-600 text-sm">
-                  Popular spot with creative brunch options and spacious terrace. Highly rated for their weekend brunch
-                  menu.
+                  Mobile analytics SaaS. Multiple remote roles in sales and customer success. Sources: company site, Glassdoor.
                 </p>
               </div>
             </div>
@@ -118,9 +116,9 @@ export default function Home() {
                 <span className="text-white text-sm font-bold">3</span>
               </div>
               <div>
-                <h4 className="text-navy-800 font-medium">Vegan Nata</h4>
+                <h4 className="text-navy-800 font-medium">Mambu</h4>
                 <p className="text-navy-600 text-sm">
-                  Specializing in vegan versions of Portugal's famous pastéis de nata with a charming garden patio area.
+                  Cloud banking platform. 5+ remote openings in engineering and operations. Verified by job boards and company listings.
                 </p>
               </div>
             </div>
@@ -360,7 +358,7 @@ export default function Home() {
                     </li>
                   </ul>
 
-                  <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">Generate a List for $5</Button>
+                  <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">Generate a List for $3.99</Button>
                 </div>
               </div>
             </div>
