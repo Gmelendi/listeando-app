@@ -7,29 +7,14 @@ import { Loader2, Sparkles } from "lucide-react"
 import { createCheckoutSession } from "@/app/actions/payment"
 import { enhancePrompt } from "@/app/actions/enhance-prompt"
 import { useToast } from "@/hooks/use-toast"
-import { DownloadCSVButton } from "@/components/download-button"
-import type { FieldDefinition } from "@/lib/db/models"
 
-// Define the list item type for MongoDB
-interface ListItem {
-  position: number
-  fields: Record<string, any>
-}
 
-interface TextareaPromptProps {
-  existingList?: {
-    prompt: string
-    items: ListItem[]
-    fields: FieldDefinition[]
-  }
-}
-
-export function TextareaPrompt({ existingList }: TextareaPromptProps) {
-  const [prompt, setPrompt] = useState(existingList?.prompt || "")
+export function TextareaPrompt() {
+  const [prompt, setPrompt] = useState("")
   const [previousPrompt, setPreviousPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isEnhancing, setIsEnhancing] = useState(false)
-  const [characterCount, setCharacterCount] = useState(existingList?.prompt?.length || 0)
+  const [characterCount, setCharacterCount] = useState(0)
   const { toast } = useToast()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -159,19 +144,10 @@ export function TextareaPrompt({ existingList }: TextareaPromptProps) {
               Preparing checkout...
             </>
           ) : (
-            "Research & Generate List for $5"
+            "Research & Generate List"
           )}
         </Button>
 
-        {existingList && (
-          <DownloadCSVButton
-            listTitle={existingList.prompt}
-            items={existingList.items}
-            fields={existingList.fields}
-            variant="outline"
-            className="flex-1 border-teal-200 text-teal-700 hover:bg-teal-50"
-          />
-        )}
       </div>
 
       <div className="flex items-center justify-center space-x-2">
