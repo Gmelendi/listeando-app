@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("stripe-signature") as string
 
   let event: Stripe.Event
-
+  console.log("Received Stripe webhook event")
   try {
     if (!webhookSecret) {
       throw new Error("Missing Stripe webhook secret")
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed":
       const session = event.data.object as Stripe.Checkout.Session
-
+      console.log(`Checkout session completed: ${session.id}`)
       try {
         // Get the prompt from the metadata
         const prompt = session.metadata?.prompt

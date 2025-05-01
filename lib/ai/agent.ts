@@ -40,10 +40,11 @@ async function gen_schema(state: typeof GraphState.State) {
                 response_format: { "type": "json_object" }, 
                 metadata: {"list_id": state.id}
             });
-
+            console.log("Schema generated")
             const json_schema = response.content.toString();
             validateSchema(json_schema);
             schema = JSON.parse(json_schema);
+            console.log("Schema validated")
             break; // If we reach here, the schema is valid
 
         } catch (e: any) {
