@@ -26,7 +26,7 @@ export async function researchAndGenerateList(prompt: string, sessionId?: string
   })
 
   // Start the research process asynchronously
-  performResearch(listId, prompt).catch((error) => {
+  await performResearch(listId, prompt).catch((error) => {
     console.error("Research failed:", error)
     // Update the list status to failed
     updateListStatus(listId, "failed", error.message)
